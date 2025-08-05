@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전국 맛집 추천</title>
+    
+    <!-- PWA 설정 -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIuygheq1rSDrp5ztsp1g7ZuUIC0g6riw7ZWY66qp6rCRIOy2lOyyniIsIAogICJzaG9ydF9uYW1lIjogIu2VmeuTpHJQ44yCIiwKICAiZGVzY3JpcHRpb24iOiAi6riw7Zuj64WMKGq0m+yynjvsl7hj7JekIHkv6rOg7LaUIOunieKvlOmdhOybhIf'byIiwog7IILOA%3D%3D">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="맛집추천">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+            color: #1f2937;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-green {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-red {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .search-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .search-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .search-input, .select-box {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .restaurants-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .restaurant-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 25px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .restaurant-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .restaurant-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .region-tag {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        
+        .category-tag {
+            background: #f3f4f6;
+            color: #374151;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-bottom: 10px;
+            margin-left: 5px;
+        }
+        
+        .rating {
+            color: #fbbf24;
+            margin-bottom: 10px;
+        }
+        
+        .specialty {
+            color: #ea580c;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        .price {
+            color: #059669;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .criteria {
+            margin-bottom: 15px;
+        }
+        
+        .criteria-tag {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            display: inline-block;
+        }
+        
+        .map-btn {
+            width: 100%;
+            background: #10b981;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .map-btn:hover {
+            background: #059669;
+        }
+        
+        .admin-section {
+            background: #f0fdf4;
+            border: 2px solid #bbf7d0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .form-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .form-input, .form-select {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .form-textarea {
+            grid-column: 1 / -1;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .admin-actions {
+            display: flex;
+            gap: 5px;
+            float: right;
+        }
+        
+        .icon-btn {
+            padding: 5px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #f3f4f6;
+            transition: background 0.2s;
+        }
+        
+        .icon-btn:hover {
+            background: #e5e7eb;
+        }
+        
+        .status {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .install-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .search-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .restaurants-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- PWA 설치 배너 -->
+<!-- 설치 배너 부분을 이렇게 수정하세요 -->
+<div id="install-banner" class="install-banner">
+    <h3>📱 바탕화면에 추가하기</h3>
+    <p>브라우저 북마크로 빠르게 접근하세요!</p>
+    <button class="btn" style="background: rgba(255,255,255,0.2); color: white; margin-top: 10px;" onclick="showInstallInstructions()">
+        설치 방법 보기
+    </button>
+</div>
+
+        <!-- 헤더 -->
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <h1>🍽️ 전국 맛집 추천</h1>
+                    <p style="color: #6b7280; margin-bottom: 10px;">엄선된 맛집만을 소개합니다. 정말 맛있는 곳만 추천해드려요!</p>
+                    <div style="font-size: 0.9rem; color: #3b82f6;">
+                        총 <strong id="total-count">0</strong>개의 맛집 | 네이버 지도 연동 | 실시간 업데이트
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="toggleAdmin()">
+                    ⚙️ <span id="admin-text">관리모드 ON</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 관리자 모드 -->
+        <div id="admin-section" class="admin-section">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h3 style="color: #166534; margin-bottom: 5px;">👨‍💼 관리자 모드</h3>
+                    <p style="color: #059669;">새로운 맛집을 추가하거나 기존 맛집을 수정/삭제할 수 있습니다.</p>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-green" onclick="showForm()">
+                        ➕ 새 맛집 추가
+                    </button>
+                    <button class="btn btn-primary" onclick="showRegionForm()">
+                        🏢 지역 추가
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 지역 추가 폼 -->
+        <div id="region-form" class="form-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h3>🏢 새 지역 추가</h3>
+                <button style="background: none; border: none; font-size: 1.5rem; cursor: pointer;" onclick="hideRegionForm()">❌</button>
+            </div>
+            
+            <input type="text" id="new-region" class="form-input" placeholder="새 지역명 (예: 부산, 서울, 제주)">
+            
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
+                <button class="btn" style="background: #6b7280; color: white;" onclick="hideRegionForm()">취소</button>
+                <button class="btn btn-primary" onclick="addRegion()">🏢 지역 추가</button>
+            </div>
+        </div>
+
+        <!-- 맛집 추가 폼 -->
+        <div id="add-form" class="form-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h3 id="form-title">✨ 새 맛집 추가</h3>
+                <button style="background: none; border: none; font-size: 1.5rem; cursor: pointer;" onclick="hideForm()">❌</button>
+            </div>
+            
+            <div class="form-grid">
+                <input type="text" id="name" class="form-input" placeholder="맛집명 (필수)">
+                <select id="region" class="form-select">
+                    <option value="">지역 선택 (필수)</option>
+                </select>
+                <select id="category" class="form-select">
+                    <option value="">카테고리 선택</option>
+                    <option value="한식">한식</option>
+                    <option value="중식">중식</option>
+                    <option value="일식">일식</option>
+                    <option value="양식">양식</option>
+                    <option value="베이커리">베이커리</option>
+                    <option value="브런치">브런치</option>
+                    <option value="카페">카페</option>
+                    <option value="고기">고기</option>
+                    <option value="동남아">동남아</option>
+                    <option value="분식">분식</option>
+                    <option value="치킨">치킨</option>
+                    <option value="해산물">해산물</option>
+                    <option value="뷔페">뷔페</option>
+                </select>
+                <input type="text" id="specialty" class="form-input" placeholder="대표메뉴 (필수)">
+                <input type="text" id="price" class="form-input" placeholder="가격대 (예: 8,000원~12,000원)">
+                <select id="rating" class="form-select">
+                    <option value="5">⭐⭐⭐⭐⭐ (5점 - 꼭 가봐야 할 맛집)</option>
+                    <option value="4.5">⭐⭐⭐⭐⭐ (4.5점 - 강력 추천)</option>
+                    <option value="4">⭐⭐⭐⭐☆ (4점 - 추천)</option>
+                    <option value="3.5">⭐⭐⭐⭐ (3.5점 - 괜찮음)</option>
+                </select>
+                <input type="text" id="address" class="form-input" placeholder="상세주소">
+                <input type="text" id="phone" class="form-input" placeholder="전화번호">
+                <input type="text" id="hours" class="form-input" placeholder="영업시간 (예: 09:00-21:00)">
+                <input type="text" id="parking" class="form-input" placeholder="주차 정보">
+                <textarea id="description" class="form-textarea" placeholder="맛집 상세 설명"></textarea>
+                <textarea id="menu-details" class="form-textarea" placeholder="상세 메뉴 정보"></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn" style="background: #6b7280; color: white;" onclick="hideForm()">취소</button>
+                <button class="btn btn-primary" onclick="saveRestaurant()">
+                    💾 <span id="save-btn-text">맛집 추가</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 검색 섹션 -->
+        <div class="search-section">
+            <div class="search-grid">
+                <input type="text" id="search" class="search-input" placeholder="🔍 맛집명, 메뉴, 지역 검색..." onkeyup="filterRestaurants()">
+                <select id="region-filter" class="select-box" onchange="filterRestaurants()">
+                    <option value="">전체 지역</option>
+                </select>
+                <div class="status">
+                    🔧 <span id="filtered-count">0</span>개 맛집
+                </div>
+            </div>
+        </div>
+
+        <!-- 맛집 리스트 -->
+        <div id="restaurants-container" class="restaurants-grid">
+            <!-- 여기에 맛집들이 표시됩니다 -->
+        </div>
+
+        <!-- 검색 결과 없음 -->
+        <div id="no-results" style="display: none; text-align: center; padding: 50px; color: #6b7280;">
+            <div style="font-size: 4rem; margin-bottom: 20px;">🔍</div>
+            <h3 style="margin-bottom: 10px;">검색 결과가 없습니다</h3>
+            <p>다른 검색어나 필터를 시도해보세요.</p>
+        </div>
+    </div>
+
+    <script>
+        // 전국 지역 리스트 (확장 가능)
+        let availableRegions = [
+            '대전', '계룡', '논산', '공주', '동학사', '서산', '태안', '세종', '천안', '아산',
+            '서울', '부산', '대구', '인천', '광주', '울산', '수원', '성남', '고양', '용인',
+            '부천', '안산', '안양', '남양주', '화성', '평택', '의정부', '시흥', '파주', '김포',
+            '제주', '강릉', '춘천', '원주', '전주', '포항', '창원', '마산', '진해', '순천'
+        ];
+
+        // 풍부한 맛집 데이터
+        let restaurants = [
+            {
+                id: 1,
+                name: '성심당',
+                region: '대전',
+                category: '베이커리',
+                specialty: '튀김소보로, 부추빵',
+                price: '2,000원~5,000원',
+                rating: 5,
+                address: '대전광역시 중구 은행동 145',
+                phone: '042-253-8069',
+                hours: '09:00-22:00',
+                parking: '주차 가능',
+                description: '1956년부터 이어온 대전의 대표 베이커리, 전국 3대 빵집. 튀김소보로는 특허받은 레시피로 유명.',
+                menuDetails: '튀김소보로 1,800원, 부추빵 1,500원, 보문산메아리 12,000원, 딸기시루 18,000원',
+                criteria: ['전국구 명성', '60년 전통', '특허받은 레시피', '대전 상징']
+            },
+            {
+                id: 2,
+                name: '태평소국밥',
+                region: '대전',
+                category: '한식',
+                specialty: '소국밥, 내장탕',
+                price: '8,500원~12,000원',
+                rating: 5,
+                address: '대전광역시 중구 태평동 423-5',
+                phone: '042-253-5941',
+                hours: '05:00-20:00 (일요일 휴무)',
+                parking: '주차 어려움',
+                description: '전국에서 찾아오는 소국밥 명가, TV 다수 출연. 새벽 5시부터 영업하는 진짜 현지인 맛집.',
+                menuDetails: '소국밥 8,500원, 내장탕 9,000원, 곰탕 10,000원, 육사시미 12,000원',
+                criteria: ['전국구 명성', '현지인 인증', 'TV 출연', '깊은 국물맛', '새벽 영업']
+            },
+            {
+                id: 3,
+                name: '대선칼국수',
+                region: '대전',
+                category: '한식',
+                specialty: '칼국수, 비빔국수',
+                price: '7,000원~12,000원',
+                rating: 4.5,
+                address: '대전광역시 서구 둔산중로40번길 28',
+                phone: '042-489-6400',
+                hours: '11:00-21:00',
+                parking: '주차 가능 (30대)',
+                description: '60년 전통의 칼국수 전문점, 유명인 사인 다수. 멸치 다시마로 14시간 우린 깊은 육수가 자랑.',
+                menuDetails: '칼국수 7,000원, 비빔국수 8,000원, 만두 6,000원, 해물파전 12,000원',
+                criteria: ['60년 전통', '유명인 인증', '방송 출연', '깊은 육수', '넓은 주차장']
+            },
+            {
+                id: 4,
+                name: '톳톳 둔산본점',
+                region: '대전',
+                category: '동남아',
+                specialty: '싱가폴칠리크랩, 랭쌥, 버터시리얼새우',
+                price: '15,000원~45,000원',
+                rating: 5,
+                address: '대전광역시 서구 둔산동 1364',
+                phone: '042-488-8822',
+                hours: '17:00-02:00 (월요일 휴무)',
+                parking: '발렛파킹 서비스',
+                description: '성시경도 다녀간 동남아 요리 전문점. 싱가폴 현지 맛을 그대로 재현한 정통 동남아 레스토랑.',
+                menuDetails: '싱가폴칠리크랩 45,000원, 랭쌥 18,000원, 버터시리얼새우 22,000원, 직화쌀국수 12,000원',
+                criteria: ['셀럽 인증', '정통 맛', '독특한 메뉴', '야간 영업', '발렛파킹']
+            },
+            {
+                id: 5,
+                name: '별천지유명가든',
+                region: '논산',
+                category: '한식',
+                specialty: '갈비탕, 갈비찜',
+                price: '12,000원~35,000원',
+                rating: 4.5,
+                address: '충청남도 논산시 연산면 고정리',
+                phone: '041-735-2233',
+                hours: '10:00-21:00',
+                parking: '넓은 주차장 완비',
+                description: '논산 연산 지역 갈비탕 명가. 30년 전통의 깊고 진한 갈비탕으로 유명한 현지 맛집.',
+                menuDetails: '갈비탕 12,000원, 갈비찜(중) 35,000원, 갈비찜(대) 50,000원, 육개장 10,000원',
+                criteria: ['30년 전통', '깊은 국물', '현지 명성', '넓은 주차장']
+            },
+            {
+                id: 6,
+                name: '강짬뽕',
+                region: '논산',
+                category: '중식',
+                specialty: '해물짬뽕, 인절미탕수육',
+                price: '8,000원~18,000원',
+                rating: 5,
+                address: '충청남도 논산시 시민로 123',
+                phone: '041-736-1234',
+                hours: '11:00-21:00 (화요일 휴무)',
+                parking: '주차 가능',
+                description: '해물이 많이 들어간 짬뽕으로 유명. 특히 인절미탕수육과 사천탕수육이 독특하고 맛있어서 SNS에서 화제.',
+                menuDetails: '해물짬뽕 9,000원, 인절미탕수육 15,000원, 사천탕수육 18,000원, 짜장면 6,000원',
+                criteria: ['해물 신선도', '독특한 메뉴', '현지 인기', 'SNS 화제']
+            },
+            {
+                id: 7,
+                name: '딴뚝통나무집식당',
+                region: '태안',
+                category: '한식',
+                specialty: '게국지, 꽃게탕',
+                price: '15,000원~30,000원',
+                rating: 5,
+                address: '충청남도 태안군 안면읍 승언리',
+                phone: '041-674-5678',
+                hours: '10:00-20:00',
+                parking: '주차장 완비',
+                description: '안면도에서 게국지를 처음 판매한 원조 맛집. 1981년부터 운영해온 태안 대표 향토음식점.',
+                menuDetails: '게국지 18,000원, 꽃게탕 25,000원, 새우젓 게장 30,000원, 바지락칼국수 12,000원',
+                criteria: ['원조 맛집', '지역 특산물', '전통 요리', '40년 역사', '안면도 대표']
+            },
+            {
+                id: 8,
+                name: '안흥꽃게장',
+                region: '서산',
+                category: '한식',
+                specialty: '간장게장, 양념게장',
+                price: '30,000원~60,000원',
+                rating: 5,
+                address: '충청남도 서산시 안흥동',
+                phone: '041-662-9999',
+                hours: '09:00-20:00',
+                parking: '주차 가능',
+                description: '2025 충남 서산 방문의 해 공식 인증 맛집. 안흥항에서 잡은 신선한 꽃게로 만든 간장게장이 일품.',
+                menuDetails: '간장게장 정식 35,000원, 양념게장 정식 38,000원, 꽃게탕 25,000원',
+                criteria: ['공식 인증', '간장게장 전문', '신선한 꽃게', '안흥항 직송']
+            }
+        ];
+
+        let isAdminMode = false;
+        let editingId = null;
+        let filteredRestaurants = [...restaurants];
+
+        // 페이지 로드 시 실행
+        window.onload = function() {
+            console.log('🚀 맛집 앱 시작!');
+            updateCounts();
+            updateRegionOptions();
+            updateRegionFilter();
+            renderRestaurants();
+            checkPWAInstall();
+        };
+
+        // PWA 설치 체크
+        function checkPWAInstall() {
+            // 모바일에서만 설치 배너 표시
+            if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                document.getElementById('install-banner').style.display = 'block';
+            }
+        }
+
+        // PWA 설치 방법 안내
+function showInstallInstructions() {
+    const instructions = `
+📱 바탕화면에 추가 방법:
+
+🤖 안드로이드 Chrome:
+1. 우상단 ⋮ 메뉴 클릭
+2. "북마크" 선택
+3. 별표 ⭐ 아이콘 클릭
+4. 또는 "즐겨찾기에 추가" 선택
+
+🍎 아이폰 Safari:
+1. 하단 공유 버튼 📤 클릭
+2. "북마크에 추가" 선택
+3. 또는 "즐겨찾기에 추가" 선택
+
+💡 더 편한 방법:
+- 이 페이지를 즐겨찾기에 저장
+- 바탕화면에 바로가기 만들기
+- 브라우저 홈화면 설정
+
+그러면 쉽게 접근할 수 있어요! 🎉
+    `;
+    alert(instructions);
+}
+
+        // 관리자 모드 토글
+        function toggleAdmin() {
+            isAdminMode = !isAdminMode;
+            const adminSection = document.getElementById('admin-section');
+            const adminText = document.getElementById('admin-text');
+            
+    if (isAdminMode) {
+        adminSection.style.display = 'block';
+        adminText.textContent = '관리모드 OFF';
+    } else {
+               adminSection.style.display = 'none';
+               adminText.textContent = '관리모드 ON';
+               hideForm();
+               hideRegionForm();
+           }
+           renderRestaurants();
+       }
+
+       // 지역 추가 폼 관련
+       function showRegionForm() {
+           document.getElementById('region-form').style.display = 'block';
+       }
+
+       function hideRegionForm() {
+           document.getElementById('region-form').style.display = 'none';
+           document.getElementById('new-region').value = '';
+       }
+
+       function addRegion() {
+           const newRegion = document.getElementById('new-region').value.trim();
+           if (!newRegion) {
+               alert('지역명을 입력해주세요!');
+               return;
+           }
+           
+           if (availableRegions.includes(newRegion)) {
+               alert('이미 존재하는 지역입니다!');
+               return;
+           }
+           
+           availableRegions.push(newRegion);
+           availableRegions.sort(); // 가나다순 정렬
+           updateRegionOptions();
+           updateRegionFilter();
+           hideRegionForm();
+           alert(`${newRegion} 지역이 추가되었습니다! 🎉`);
+       }
+
+       // 맛집 폼 관련
+       function showForm() {
+           document.getElementById('add-form').style.display = 'block';
+           document.getElementById('form-title').textContent = editingId ? '🔧 맛집 정보 수정' : '✨ 새 맛집 추가';
+           document.getElementById('save-btn-text').textContent = editingId ? '수정 완료' : '맛집 추가';
+       }
+
+       function hideForm() {
+           document.getElementById('add-form').style.display = 'none';
+           clearForm();
+           editingId = null;
+       }
+
+       function clearForm() {
+           ['name', 'region', 'category', 'specialty', 'price', 'address', 'phone', 'hours', 'parking', 'description', 'menu-details'].forEach(id => {
+               document.getElementById(id).value = '';
+           });
+           document.getElementById('rating').value = '5';
+       }
+
+       // 지역 옵션 업데이트
+       function updateRegionOptions() {
+           const regionSelect = document.getElementById('region');
+           regionSelect.innerHTML = '<option value="">지역 선택 (필수)</option>';
+           availableRegions.forEach(region => {
+               regionSelect.innerHTML += `<option value="${region}">${region}</option>`;
+           });
+       }
+
+       function updateRegionFilter() {
+           const regionFilter = document.getElementById('region-filter');
+           const existingRegions = [...new Set(restaurants.map(r => r.region))].sort();
+           
+           regionFilter.innerHTML = '<option value="">전체 지역</option>';
+           existingRegions.forEach(region => {
+               regionFilter.innerHTML += `<option value="${region}">${region}</option>`;
+           });
+       }
+
+       // 맛집 저장
+       function saveRestaurant() {
+           const name = document.getElementById('name').value.trim();
+           const region = document.getElementById('region').value;
+           const specialty = document.getElementById('specialty').value.trim();
+           
+           if (!name || !region || !specialty) {
+               alert('맛집명, 지역, 대표메뉴는 필수입니다!');
+               return;
+           }
+
+           const restaurant = {
+               id: editingId || Math.max(...restaurants.map(r => r.id), 0) + 1,
+               name: name,
+               region: region,
+               category: document.getElementById('category').value || '기타',
+               specialty: specialty,
+               price: document.getElementById('price').value.trim() || '가격 문의',
+               rating: parseFloat(document.getElementById('rating').value),
+               address: document.getElementById('address').value.trim() || '주소 미정',
+               phone: document.getElementById('phone').value.trim() || '전화번호 미정',
+               hours: document.getElementById('hours').value.trim() || '영업시간 문의',
+               parking: document.getElementById('parking').value.trim() || '주차 정보 없음',
+               description: document.getElementById('description').value.trim() || '',
+               menuDetails: document.getElementById('menu-details').value.trim() || '',
+               criteria: ['사용자 추가']
+           };
+
+           if (editingId) {
+               const index = restaurants.findIndex(r => r.id === editingId);
+               restaurants[index] = restaurant;
+               alert('맛집 정보가 수정되었습니다! ✅');
+           } else {
+               restaurants.push(restaurant);
+               alert('새 맛집이 추가되었습니다! 🎉');
+           }
+
+           hideForm();
+           updateCounts();
+           updateRegionFilter();
+           filterRestaurants();
+       }
+
+       // 맛집 수정
+       function editRestaurant(id) {
+           const restaurant = restaurants.find(r => r.id === id);
+           if (!restaurant) return;
+
+           editingId = id;
+           document.getElementById('name').value = restaurant.name;
+           document.getElementById('region').value = restaurant.region;
+           document.getElementById('category').value = restaurant.category || '';
+           document.getElementById('specialty').value = restaurant.specialty;
+           document.getElementById('price').value = restaurant.price || '';
+           document.getElementById('rating').value = restaurant.rating || 5;
+           document.getElementById('address').value = restaurant.address || '';
+           document.getElementById('phone').value = restaurant.phone || '';
+           document.getElementById('hours').value = restaurant.hours || '';
+           document.getElementById('parking').value = restaurant.parking || '';
+           document.getElementById('description').value = restaurant.description || '';
+           document.getElementById('menu-details').value = restaurant.menuDetails || '';
+           showForm();
+       }
+
+       // 맛집 삭제
+       function deleteRestaurant(id) {
+           if (confirm('정말 이 맛집을 삭제하시겠습니까?')) {
+               restaurants = restaurants.filter(r => r.id !== id);
+               alert('맛집이 삭제되었습니다.');
+               updateCounts();
+               updateRegionFilter();
+               filterRestaurants();
+           }
+       }
+
+       // 개수 업데이트
+       function updateCounts() {
+           document.getElementById('total-count').textContent = restaurants.length;
+           document.getElementById('filtered-count').textContent = filteredRestaurants.length;
+       }
+
+       // 필터링 기능
+       function filterRestaurants() {
+           const searchTerm = document.getElementById('search').value.toLowerCase();
+           const regionFilter = document.getElementById('region-filter').value;
+           
+           filteredRestaurants = restaurants.filter(restaurant => {
+               const matchesSearch = !searchTerm || 
+                   restaurant.name.toLowerCase().includes(searchTerm) ||
+                   restaurant.specialty.toLowerCase().includes(searchTerm) ||
+                   restaurant.region.toLowerCase().includes(searchTerm) ||
+                   (restaurant.description && restaurant.description.toLowerCase().includes(searchTerm)) ||
+                   (restaurant.menuDetails && restaurant.menuDetails.toLowerCase().includes(searchTerm));
+               
+               const matchesRegion = !regionFilter || restaurant.region === regionFilter;
+               
+               return matchesSearch && matchesRegion;
+           });
+           
+           updateCounts();
+           renderRestaurants();
+       }
+
+       // 평점 표시
+       function renderStars(rating) {
+           const fullStars = Math.floor(rating);
+           const hasHalf = rating % 1 !== 0;
+           let stars = '';
+           
+           for (let i = 0; i < fullStars; i++) {
+               stars += '⭐';
+           }
+           if (hasHalf) {
+               stars += '⭐';
+           }
+           
+           return `<span style="color: #fbbf24;">${stars}</span> <span style="color: #6b7280;">(${rating})</span>`;
+       }
+
+       // 맛집 렌더링
+       function renderRestaurants() {
+           const container = document.getElementById('restaurants-container');
+           const noResults = document.getElementById('no-results');
+           
+           if (filteredRestaurants.length === 0) {
+               container.style.display = 'none';
+               noResults.style.display = 'block';
+               return;
+           }
+           
+           container.style.display = 'grid';
+           noResults.style.display = 'none';
+           
+           container.innerHTML = filteredRestaurants.map(restaurant => `
+               <div class="restaurant-card">
+                   <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                       <div class="restaurant-name">${restaurant.name}</div>
+                       ${isAdminMode ? `
+                           <div class="admin-actions">
+                               <button class="icon-btn" onclick="editRestaurant(${restaurant.id})" title="수정">✏️</button>
+                               <button class="icon-btn" onclick="deleteRestaurant(${restaurant.id})" title="삭제">🗑️</button>
+                           </div>
+                       ` : ''}
+                   </div>
+                   
+                   <span class="region-tag">${restaurant.region}</span>
+                   ${restaurant.category ? `<span class="category-tag">${restaurant.category}</span>` : ''}
+                   
+                   <div class="rating">${renderStars(restaurant.rating)}</div>
+                   <div class="specialty">${restaurant.specialty}</div>
+                   
+                   ${restaurant.description ? `<div class="description">${restaurant.description}</div>` : ''}
+                   
+                   <div class="price">💰 ${restaurant.price}</div>
+                   
+                   ${restaurant.phone && restaurant.phone !== '전화번호 미정' ? `<div style="color: #059669; margin-bottom: 10px;">📞 ${restaurant.phone}</div>` : ''}
+                   
+                   ${restaurant.hours && restaurant.hours !== '영업시간 문의' ? `<div style="color: #6b7280; font-size: 0.9rem; margin-bottom: 10px;">🕒 ${restaurant.hours}</div>` : ''}
+                   
+                   ${restaurant.parking && restaurant.parking !== '주차 정보 없음' ? `<div style="color: #6b7280; font-size: 0.9rem; margin-bottom: 10px;">🅿️ ${restaurant.parking}</div>` : ''}
+                   
+                   ${restaurant.menuDetails ? `
+                       <div style="background: #f9fafb; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+                           <h4 style="font-size: 0.9rem; color: #374151; margin-bottom: 5px;">📋 메뉴 정보:</h4>
+                           <div style="color: #6b7280; font-size: 0.8rem;">${restaurant.menuDetails}</div>
+                       </div>
+                   ` : ''}
+                   
+                   ${restaurant.criteria ? `
+                       <div class="criteria">
+                           ${restaurant.criteria.map(c => `<span class="criteria-tag">${c}</span>`).join('')}
+                       </div>
+                   ` : ''}
+                   
+                   <button class="map-btn" onclick="openMap('${restaurant.address}', '${restaurant.name}')">
+                       📍 네이버 지도에서 보기
+                   </button>
+               </div>
+           `).join('');
+       }
+
+       // 네이버 지도 열기
+       function openMap(address, name) {
+           console.log('🗺️ 지도 열기:', name, address);
+           const query = encodeURIComponent(address + ' ' + name);
+           const url = `https://map.naver.com/v5/search/${query}`;
+           window.open(url, '_blank');
+       }
+
+       // 디버깅
+       console.log('📊 초기 데이터:', restaurants.length, '개 맛집');
+       console.log('🏢 사용 가능한 지역:', availableRegions.length, '개');
+   </script>
+</body>
+</html>
